@@ -1,0 +1,12 @@
+# created by virtualenv automatically
+
+# Ignore the virtual environment
+.venv/
+
+# Ignore large files such as model weights or datasets
+*.h5
+*.csv
+*.keras
+.idea/
+config/
+test/
