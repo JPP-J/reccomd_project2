@@ -1,0 +1,119 @@
+# Example Result:
+Original data shape: (113518, 3)
+Columns: ['user_id' 'book_id' 'rating']
+Sampling data shape: (90814, 3)
+
+Generating recommendations for user_id: 172
+
+User-based CF recommendations: [2857, 2988, 3151, 3378, 3897, 3969, 4745, 4880, 6487, 6625]
+Item-based CF recommendations: [202, 1398, 1667, 2267, 2283, 2319, 2428, 2580, 2916, 2940]
+User KNN recommendations: [110, 1, 25, 39, 135, 17, 23, 20, 69, 141]
+Item KNN recommendations: [8159, 4, 5, 8, 10, 23, 25, 36, 38, 47]
+
+Evaluation Metrics:
+precision@5_cf_user: 0.0004
+precision@5_cf_item: 0.0004
+precision@5_knn_user: 0.1524
+precision@5_knn_item: 0.0148
+precision@10_cf_user: 0.0004
+precision@10_cf_item: 0.0003
+precision@10_knn_user: 0.1314
+precision@10_knn_item: 0.0130
+precision@15_cf_user: 0.0005
+precision@15_cf_item: 0.0003
+precision@15_knn_user: 0.1153
+precision@15_knn_item: 0.0122
+
+
+---------------------------------------
+Model: "functional"
+┌─────────────────────┬───────────────────┬────────────┬───────────────────┐
+│ Layer (type)        │ Output Shape      │    Param # │ Connected to      │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ user_input          │ (None, 1)         │          0 │ -                 │
+│ (InputLayer)        │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ item_input          │ (None, 1)         │          0 │ -                 │
+│ (InputLayer)        │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ embedding           │ (None, 1, 64)     │  3,419,136 │ user_input[0][0]  │
+│ (Embedding)         │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ embedding_1         │ (None, 1, 64)     │    640,000 │ item_input[0][0]  │
+│ (Embedding)         │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ flatten (Flatten)   │ (None, 64)        │          0 │ embedding[0][0]   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ flatten_1 (Flatten) │ (None, 64)        │          0 │ embedding_1[0][0] │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ concatenate         │ (None, 128)       │          0 │ flatten[0][0],    │
+│ (Concatenate)       │                   │            │ flatten_1[0][0]   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dense (Dense)       │ (None, 128)       │     16,512 │ concatenate[0][0] │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dropout (Dropout)   │ (None, 128)       │          0 │ dense[0][0]       │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dense_1 (Dense)     │ (None, 64)        │      8,256 │ dropout[0][0]     │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dropout_1 (Dropout) │ (None, 64)        │          0 │ dense_1[0][0]     │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dense_2 (Dense)     │ (None, 1)         │         65 │ dropout_1[0][0]   │
+└─────────────────────┴───────────────────┴────────────┴───────────────────┘
+ Total params: 4,083,969 (15.58 MB)
+ Trainable params: 4,083,969 (15.58 MB)
+ Non-trainable params: 0 (0.00 B)
+Min user_id: 0, Max user_id: 53423
+Min item_id: 0, Max item_id: 9999
+Epoch 1/10
+16809/16809 ━━━━━━━━━━━━━━━━━━━━ 505s 30ms/step - loss: 1.2366 - val_loss: 0.8141
+Epoch 2/10
+16809/16809 ━━━━━━━━━━━━━━━━━━━━ 518s 31ms/step - loss: 0.7598 - val_loss: 0.8055
+Epoch 3/10
+16809/16809 ━━━━━━━━━━━━━━━━━━━━ 507s 30ms/step - loss: 0.6749 - val_loss: 0.8082
+Epoch 4/10
+16809/16809 ━━━━━━━━━━━━━━━━━━━━ 507s 30ms/step - loss: 0.5764 - val_loss: 0.8414
+Epoch 5/10
+16809/16809 ━━━━━━━━━━━━━━━━━━━━ 486s 29ms/step - loss: 0.4718 - val_loss: 0.8914
+Epoch 6/10
+16809/16809 ━━━━━━━━━━━━━━━━━━━━ 527s 31ms/step - loss: 0.3868 - val_loss: 0.9511
+Epoch 7/10
+16809/16809 ━━━━━━━━━━━━━━━━━━━━ 570s 34ms/step - loss: 0.3266 - val_loss: 0.9624
+Epoch 8/10
+16809/16809 ━━━━━━━━━━━━━━━━━━━━ 553s 33ms/step - loss: 0.2856 - val_loss: 1.0063
+Epoch 9/10
+16809/16809 ━━━━━━━━━━━━━━━━━━━━ 529s 31ms/step - loss: 0.2521 - val_loss: 1.0259
+Epoch 10/10
+16809/16809 ━━━━━━━━━━━━━━━━━━━━ 536s 32ms/step - loss: 0.2296 - val_loss: 1.0115
+WARNING:absl:You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`.
+Model saved as recommendation_model.h5....
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 174ms/step
+Predicted rating for user 1 and item 101: 5.081524848937988
+18677/18677 ━━━━━━━━━━━━━━━━━━━━ 29s 2ms/step - loss: 0.1507
+Test Loss: 0.23377932608127594
+
+
+
+
+# --------------------------------
+      movieId  ...                           genres
+9737   193581  ...  Action|Animation|Comedy|Fantasy
+9738   193583  ...         Animation|Comedy|Fantasy
+9739   193585  ...                            Drama
+9740   193587  ...                 Action|Animation
+9741   193609  ...                           Comedy
+
+[5 rows x 3 columns]
+Index(['movieId', 'title', 'genres'], dtype='object')
+Original data shape: (100836, 3)
+Columns: ['user_id' 'item_id' 'rating']
+Sampling data shape: (75627, 3)
+
+Generating recommendations for user_id: 289
+
+User-based CF recommendations: [3760, 3795, 78836, 82, 99, 334, 506, 667, 891, 906]
+Item-based CF recommendations: [113252, 162478, 1054, 1128, 3696, 3945, 4574, 4852, 5275, 5953]
+User KNN recommendations: [318, 593, 457, 296, 260, 356, 592, 1090, 5952, 150]
+Item KNN recommendations: [589, 1221, 1266, 3142, 3174, 4011, 4067, 4359, 4572, 4654]
+Recommendations for user 289 with query 'drama Thriller': [3760, 3795, 180497, 78836, 82, 46723, 99, 334, 143365, 506]
+
+
