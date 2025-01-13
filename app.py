@@ -11,7 +11,7 @@ with open('model/recommender.pkl', 'rb') as f:
     recommender = pickle.load(f)
 
 # Load item metadata (assuming it contains 'movieId' and 'title')
-metadata_path = r"C:\1.PIGGEST\06_Course\06_Advanced-Mining-Algorithms\final_project_06\Data set\Dataset\ml-latest-small\ml-latest-small\movies.csv"
+metadata_path = "https://drive.google.com/uc?id=15tQrIEUNzLOBeLNeDihK20IbAgzjejay"
 item_metadata = pd.read_csv(metadata_path)  # Contains 'item_id' and 'description and eg.,'
 
 # Create a dictionary to map movieId to movie title

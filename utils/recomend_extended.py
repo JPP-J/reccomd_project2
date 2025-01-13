@@ -380,7 +380,7 @@ class RecommenderSystem:
 
     def recommend_with_semantics(self, query, top_n=10):
         # Generate query embedding
-        model = SentenceTransformer('all-MiniLM-L6-v2')
+        model = SentenceTransformer('all-MiniLM-L6-v2')     # with 384-dimensional embeddings
         query_embedding = model.encode([query])
 
         # Perform semantic search using FAISS
@@ -401,6 +401,7 @@ class RecommenderSystem:
         # Combine and rank
         combined_scores = {}
         all_items = set(cf_scores.keys()).union(set(semantic_scores.keys()))
+
         for item in all_items:
             combined_scores[item] = cf_weight * (1 / (cf_scores.get(item, float('inf')))) + \
                                     llm_weight * (1 / (semantic_scores.get(item, float('inf'))))
