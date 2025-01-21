@@ -165,9 +165,9 @@ def CF_model_trian(path, frac=0.025, epoch=10):
 
     print(f'Finished training data....')
 
-    torch.save(model.state_dict(), "collaborative_filtering_param_model.pth")
-    torch.save(model, "collaborative_filtering_model_complete.pth")
-    torch.save(history, "training_history.pth")
+    torch.save(model.state_dict(), "model/collaborative_filtering_param_model.pth")
+    torch.save(model, "model/collaborative_filtering_model_complete.pth")
+    torch.save(history, "model/training_history.pth")
     print("Model and training history saved!")
 
 
