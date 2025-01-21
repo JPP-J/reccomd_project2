@@ -1,0 +1,218 @@
+> main.py
+
+# Example Result:
+Original data shape: (113518, 3)
+Columns: ['user_id' 'book_id' 'rating']
+Sampling data shape: (90814, 3)
+
+Generating recommendations for user_id: 172
+
+User-based CF recommendations: [2857, 2988, 3151, 3378, 3897, 3969, 4745, 4880, 6487, 6625]
+Item-based CF recommendations: [202, 1398, 1667, 2267, 2283, 2319, 2428, 2580, 2916, 2940]
+User KNN recommendations: [110, 1, 25, 39, 135, 17, 23, 20, 69, 141]
+Item KNN recommendations: [8159, 4, 5, 8, 10, 23, 25, 36, 38, 47]
+
+Evaluation Metrics:
+precision@5_cf_user: 0.0004
+precision@5_cf_item: 0.0004
+precision@5_knn_user: 0.1524
+precision@5_knn_item: 0.0148
+precision@10_cf_user: 0.0004
+precision@10_cf_item: 0.0003
+precision@10_knn_user: 0.1314
+precision@10_knn_item: 0.0130
+precision@15_cf_user: 0.0005
+precision@15_cf_item: 0.0003
+precision@15_knn_user: 0.1153
+precision@15_knn_item: 0.0122
+
+
+---------------------------------------
+> test1.py
+Model: "functional"
+┌─────────────────────┬───────────────────┬────────────┬───────────────────┐
+│ Layer (type)        │ Output Shape      │    Param # │ Connected to      │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ user_input          │ (None, 1)         │          0 │ -                 │
+│ (InputLayer)        │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ item_input          │ (None, 1)         │          0 │ -                 │
+│ (InputLayer)        │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ embedding           │ (None, 1, 64)     │  3,419,200 │ user_input[0][0]  │
+│ (Embedding)         │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ embedding_1         │ (None, 1, 64)     │    640,064 │ item_input[0][0]  │
+│ (Embedding)         │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ flatten (Flatten)   │ (None, 64)        │          0 │ embedding[0][0]   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ flatten_1 (Flatten) │ (None, 64)        │          0 │ embedding_1[0][0] │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ concatenate         │ (None, 128)       │          0 │ flatten[0][0],    │
+│ (Concatenate)       │                   │            │ flatten_1[0][0]   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dense (Dense)       │ (None, 128)       │     16,512 │ concatenate[0][0] │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dropout (Dropout)   │ (None, 128)       │          0 │ dense[0][0]       │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dense_1 (Dense)     │ (None, 64)        │      8,256 │ dropout[0][0]     │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dropout_1 (Dropout) │ (None, 64)        │          0 │ dense_1[0][0]     │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dense_2 (Dense)     │ (None, 1)         │         65 │ dropout_1[0][0]   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ multiply (Multiply) │ (None, 1)         │          0 │ dense_2[0][0]     │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ add (Add)           │ (None, 1)         │          0 │ multiply[0][0]    │
+└─────────────────────┴───────────────────┴────────────┴───────────────────┘
+ Total params: 4,084,097 (15.58 MB)
+ Trainable params: 4,084,097 (15.58 MB)
+ Non-trainable params: 0 (0.00 B)
+Min user_id: 0, Max user_id: 53423
+Min item_id: 0, Max item_id: 9999
+Epoch 1/10
+7471/7471 ━━━━━━━━━━━━━━━━━━━━ 200s 27ms/step - accuracy: 0.0205 - loss: 0.9482 - val_accuracy: 0.0204 - val_loss: 0.8580
+Epoch 2/10
+7471/7471 ━━━━━━━━━━━━━━━━━━━━ 198s 26ms/step - accuracy: 0.0209 - loss: 0.6976 - val_accuracy: 0.0204 - val_loss: 0.8602
+Epoch 3/10
+7471/7471 ━━━━━━━━━━━━━━━━━━━━ 197s 26ms/step - accuracy: 0.0200 - loss: 0.5702 - val_accuracy: 0.0204 - val_loss: 0.8907
+Epoch 4/10
+7471/7471 ━━━━━━━━━━━━━━━━━━━━ 198s 26ms/step - accuracy: 0.0204 - loss: 0.4260 - val_accuracy: 0.0204 - val_loss: 0.9638
+Epoch 5/10
+7471/7471 ━━━━━━━━━━━━━━━━━━━━ 200s 27ms/step - accuracy: 0.0202 - loss: 0.3118 - val_accuracy: 0.0204 - val_loss: 1.0309
+Epoch 6/10
+7471/7471 ━━━━━━━━━━━━━━━━━━━━ 196s 26ms/step - accuracy: 0.0204 - loss: 0.2392 - val_accuracy: 0.0204 - val_loss: 1.0492
+Epoch 7/10
+7471/7471 ━━━━━━━━━━━━━━━━━━━━ 190s 25ms/step - accuracy: 0.0205 - loss: 0.1903 - val_accuracy: 0.0204 - val_loss: 1.0826
+Epoch 8/10
+7471/7471 ━━━━━━━━━━━━━━━━━━━━ 191s 26ms/step - accuracy: 0.0203 - loss: 0.1546 - val_accuracy: 0.0204 - val_loss: 1.0662
+Epoch 9/10
+7471/7471 ━━━━━━━━━━━━━━━━━━━━ 190s 25ms/step - accuracy: 0.0206 - loss: 0.1321 - val_accuracy: 0.0204 - val_loss: 1.0646
+Epoch 10/10
+7471/7471 ━━━━━━━━━━━━━━━━━━━━ 190s 25ms/step - accuracy: 0.0203 - loss: 0.1131 - val_accuracy: 0.0204 - val_loss: 1.1000
+WARNING:absl:You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`.
+Model saved as recommendation_model....
+History saved as recommendation_model....
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 99ms/step
+Predicted rating for user 1 and item 101: 3.217104434967041
+9339/9339 ━━━━━━━━━━━━━━━━━━━━ 10s 1ms/step - accuracy: 0.0204 - loss: 0.0894
+Test Loss: [0.27395713329315186, 0.02057063765823841]
+
+Loading summary model...
+C:\Users\topde\PycharmProjects\Projects\reccomd_project2\.venv\Lib\site-packages\keras\src\saving\saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'rmsprop', because it has 10 variables whereas the saved optimizer has 18 variables.
+  saveable.load_own_variables(weights_store.get(inner_path))
+Model: "functional"
+┌─────────────────────┬───────────────────┬────────────┬───────────────────┐
+│ Layer (type)        │ Output Shape      │    Param # │ Connected to      │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ user_input          │ (None, 1)         │          0 │ -                 │
+│ (InputLayer)        │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ item_input          │ (None, 1)         │          0 │ -                 │
+│ (InputLayer)        │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ embedding           │ (None, 1, 64)     │  3,419,200 │ user_input[0][0]  │
+│ (Embedding)         │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ embedding_1         │ (None, 1, 64)     │    640,064 │ item_input[0][0]  │
+│ (Embedding)         │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ flatten (Flatten)   │ (None, 64)        │          0 │ embedding[0][0]   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ flatten_1 (Flatten) │ (None, 64)        │          0 │ embedding_1[0][0] │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ concatenate         │ (None, 128)       │          0 │ flatten[0][0],    │
+│ (Concatenate)       │                   │            │ flatten_1[0][0]   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dense (Dense)       │ (None, 128)       │     16,512 │ concatenate[0][0] │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dropout (Dropout)   │ (None, 128)       │          0 │ dense[0][0]       │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dense_1 (Dense)     │ (None, 64)        │      8,256 │ dropout[0][0]     │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dropout_1 (Dropout) │ (None, 64)        │          0 │ dense_1[0][0]     │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dense_2 (Dense)     │ (None, 1)         │         65 │ dropout_1[0][0]   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ multiply (Multiply) │ (None, 1)         │          0 │ dense_2[0][0]     │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ add (Add)           │ (None, 1)         │          0 │ multiply[0][0]    │
+└─────────────────────┴───────────────────┴────────────┴───────────────────┘
+ Total params: 4,084,097 (15.58 MB)
+ Trainable params: 4,084,097 (15.58 MB)
+ Non-trainable params: 0 (0.00 B)
+None
+
+Loading and plotting saved history...
+
+Final Training Metrics from Saved History:
+Training Accuracy: 0.0206
+Validation Accuracy: 0.0204
+Training Loss: 0.1226
+Validation Loss: 1.1000
+
+Generating recommendations for user_id: 42679
+
+interacted_items: [203, 962, 589, 1, 153, 12, 319, 1425, 4408, 1165, 5172, 6657, 5450, 34, 218, 51, 206, 182, 644, 812, 1658, 750, 210, 74, 1209, 1784, 1110, 2410, 423, 506, 5153, 1285, 8219, 9678, 7367, 1776, 1994, 6099, 5904, 69, 105, 2714, 6666, 3015, 1130, 5457, 5170, 3422, 2185, 8642, 517, 861, 2333, 4185, 7705, 8991, 1169, 1702, 5555, 7415, 8621, 2801, 6303, 9167, 2395, 9825, 9269, 9109, 8344, 6127, 2178, 1562, 5178, 7936, 5466, 6700, 4092, 5434, 1062, 3778, 4109, 1542]
+size of items: 82
+User input: [42679 42679 42679 ... 42679 42679 42679]
+Item input: [   2    3    4 ... 9997 9998 9999]
+310/310 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step
+Top Recommendations for User 42679
+Item ID: 421, Predicted Score: 5.0000
+Item ID: 1379, Predicted Score: 5.0000
+Item ID: 1787, Predicted Score: 5.0000
+Item ID: 2255, Predicted Score: 5.0000
+Item ID: 2271, Predicted Score: 5.0000
+
+> pt.py
+Initial load data....
+n_users: 53424, n_items: 10000
+Start training data....
+C:\Users\topde\PycharmProjects\Projects\reccomd_project2\utils\intregate_recmd_pt.py:274: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = GradScaler()  # For mixed precision training
+C:\Users\topde\PycharmProjects\Projects\reccomd_project2\utils\intregate_recmd_pt.py:296: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():  # Mixed precision
+Epoch 1/10, Train Loss: 1.2158, Train Acc: 0.3323, Val Loss: 1.0052, Val Acc: 0.3499
+Epoch 2/10, Train Loss: 0.9991, Train Acc: 0.3576, Val Loss: 0.9854, Val Acc: 0.3537
+Epoch 3/10, Train Loss: 0.9107, Train Acc: 0.3805, Val Loss: 0.9457, Val Acc: 0.3677
+Epoch 4/10, Train Loss: 0.8108, Train Acc: 0.4235, Val Loss: 0.9555, Val Acc: 0.3662
+Epoch 5/10, Train Loss: 0.7084, Train Acc: 0.4721, Val Loss: 0.9783, Val Acc: 0.3543
+Epoch 6/10, Train Loss: 0.6247, Train Acc: 0.5159, Val Loss: 1.0064, Val Acc: 0.3821
+Epoch 7/10, Train Loss: 0.5464, Train Acc: 0.5533, Val Loss: 0.9944, Val Acc: 0.3746
+Epoch 8/10, Train Loss: 0.4755, Train Acc: 0.5890, Val Loss: 1.0347, Val Acc: 0.3822
+Epoch 9/10, Train Loss: 0.4186, Train Acc: 0.6219, Val Loss: 1.0895, Val Acc: 0.3796
+Epoch 10/10, Train Loss: 0.3693, Train Acc: 0.6518, Val Loss: 1.1328, Val Acc: 0.3749
+Finished training data....
+Model and training history saved!
+
+
+Model Architecture:
+CFModel(
+  (user_embedding): Embedding(53424, 64)
+  (item_embedding): Embedding(10000, 64)
+  (dropout): Dropout(p=0.2, inplace=False)
+  (fc1): Linear(in_features=128, out_features=128, bias=True)
+  (fc2): Linear(in_features=128, out_features=64, bias=True)
+  (fc3): Linear(in_features=64, out_features=1, bias=True)
+
+Final Metrics:
+Final Train Loss: 0.4777
+Final Val Loss: 0.9746
+Final Train Accuracy: 0.6225
+Final Val Accuracy: 0.4199
+
+
+Generating recommendations for user_id: 12672
+
+interacted_items: [5697, 9692, 355, 656, 1652, 2319, 2428, 1585, 254, 957, 3218, 6248, 1437, 1541, 2267, 3121, 5689, 6918, 8674, 9013, 2711, 1637, 3677, 9355, 6649, 1140, 1799, 2987, 2134, 2593, 3165, 5473, 4087, 2996, 3473, 376, 711, 3208, 1452, 5200, 655, 8968, 5574, 6731, 3052, 443, 8391, 615, 3665, 7745, 3563, 4599, 3968, 5985, 3626, 217, 297, 1780, 750, 1169, 1560, 2130, 2417, 1352, 7799, 5847, 720, 9798]
+size of items: 68
+User input: tensor([12672, 12672, 12672,  ..., 12672, 12672, 12672])
+Item input: tensor([   1,    2,    3,  ..., 9997, 9998, 9999])
+Top Recommendations for User 12672
+Item ID: 9490, Predicted Score: 4.9328
+Item ID: 4343, Predicted Score: 4.9057
+Item ID: 6128, Predicted Score: 4.8627
+Item ID: 1307, Predicted Score: 4.8501
+Item ID: 7235, Predicted Score: 4.8194
