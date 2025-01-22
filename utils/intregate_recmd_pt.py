@@ -7,6 +7,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from torch.cuda.amp import GradScaler, autocast
 
+# PyTorch
+torch.manual_seed(42)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(42)
+
 # Define a simple model using Embeddings for Collaborative Filtering
 class CFModel(nn.Module):
     def __init__(self, n_users, n_items, embedding_dim=64):
@@ -47,7 +52,7 @@ class CFModel(nn.Module):
         x = torch.sigmoid(x) * 4 + 1  # Scale sigmoid output to [1, 5]
         return x
 
-def CF_model_trian(path, frac=0.025, epoch=10):
+def CF_model_trian(path, frac=0.025, epoch=10, batch_size=16, embedding_dim=64):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.cuda.empty_cache()  # Clear GPU cache
 
@@ -86,11 +91,11 @@ def CF_model_trian(path, frac=0.025, epoch=10):
     val_size = len(dataset) - train_size
     train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
 
-    train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)  # Reduced batch size
-    val_dataloader = DataLoader(val_dataset, batch_size=16, shuffle=False)     # Reduced batch size
+    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)  # Reduced batch size
+    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)     # Reduced batch size
 
     # Create the model
-    model = CFModel(n_users=n_users, n_items=n_items, embedding_dim=64).to(device)
+    model = CFModel(n_users=n_users, n_items=n_items, embedding_dim=embedding_dim).to(device)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     scaler = GradScaler()  # For mixed precision training

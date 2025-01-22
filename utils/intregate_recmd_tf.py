@@ -6,14 +6,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from tensorflow import keras
 import joblib
+import pickle
 
 
-def tf_model(path):
+
+def tf_model(path, embedding_dim=64):
     # Load and prepare data
     df = pd.read_csv(path)
     n_users = len(np.unique(df['user_id'])) + 1     # fix out of bound issue
     n_items = len(np.unique(df['book_id'])) + 1     # fix out of bound issue
-    embedding_dim = 64  # Size of embedding vectors
+    embedding_dim = embedding_dim  # Size of embedding vectors
 
     # User and item input layers
     user_input = layers.Input(shape=(1,), dtype=tf.int32, name="user_input")
@@ -44,12 +46,60 @@ def tf_model(path):
     model = models.Model(inputs=[user_input, item_input], outputs=output, callbacks=[early_stopping])
 
     # Compile the model with the Adam optimizer and mean squared error loss
-    model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
+    # optimizer = tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-7)
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+    model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['accuracy'])
 
     # Summary of the model
     model.summary()
 
     return df, model
+
+def tf_model_train(path, frac=0.025, epoch=10, batch_size=16, validation_split=0.2, embedding_dim=64):
+    # Load and prepare data
+    df, model = tf_model(path, embedding_dim=embedding_dim)
+
+    # sampling df (e.g., random sampling 5% of the data)
+    sampled_df = df.sample(frac=frac, random_state=42)
+
+    user_ids = sampled_df['user_id'].to_numpy()
+    item_ids = sampled_df['book_id'].to_numpy()
+    ratings = sampled_df['rating'].to_numpy()
+
+    user_ids = user_ids - user_ids.min()  # Adjust to start from 0
+    item_ids = item_ids - item_ids.min()  # Adjust to start from 0
+
+    print(f"Min user_id: {user_ids.min()}, Max user_id: {user_ids.max()}")
+    print(f"Min item_id: {item_ids.min()}, Max item_id: {item_ids.max()}")
+
+    # Train the model (using sample data)
+    model.fit([user_ids, item_ids], ratings,
+              epochs=epoch,
+              batch_size=batch_size,
+              validation_split=validation_split)
+
+
+    # Save the model to a file
+    model.save('model/recommendation_model.keras')
+    model.save('model/recommendation_model.h5')  # optional
+    print("Model saved as recommendation_model....")
+
+    # Save the history to a file
+    with open('model/training_history.pkl', 'wb') as f:
+        pickle.dump(model.history, f)
+    print("History saved as recommendation_model....")
+    print("Model and training history saved!")
+
+    # Prediction part
+    # Predict the rating for a specific user-item pair
+    predicted_rating = model.predict([np.array([1]), np.array([101])])
+    print(f"Predicted rating for user 1 and item 101: {predicted_rating[0][0]}")
+
+    # Evaluate the model on the test set
+    test_loss = model.evaluate([user_ids, item_ids], ratings)
+    print(f"Test Loss: {test_loss}")
+
+
 
 def plot_history(history):
     history = history.history
