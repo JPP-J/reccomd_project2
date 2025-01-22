@@ -1,0 +1,10 @@
+# Ignore all files and folders by default
+*
+
+# Include only the necessary files and folders
+!Dockerfile
+!reccmd_pt.py
+!reccmd_tf.py
+!requirements.txt
+!utils/
+!example_results_DL.txt
