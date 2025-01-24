@@ -1,4 +1,7 @@
 > main.py
+>> reccomd_sys(path, metadata_path) function
+
+Loading data....
 
       movieId  ...                           genres
 9737   193581  ...  Action|Animation|Comedy|Fantasy
@@ -9,14 +12,61 @@
 
 [5 rows x 3 columns]
 Index(['movieId', 'title', 'genres'], dtype='object')
+
+building recommendation system....
+
 Original data shape: (100836, 3)
 Columns: ['user_id' 'item_id' 'rating']
 Sampling data shape: (100836, 3)
+C:\Users\topde\PycharmProjects\Projects\reccomd_project2\.venv\Lib\site-packages\sklearn\decomposition\_nmf.py:1742: ConvergenceWarning: Maximum number of iterations 200 reached. Increase it to improve convergence.
+  warnings.warn(
 
-Generating recommendations for user_id: 325
+Generating recommendations for user_id: 435
 
-User-based CF recommendations: [1733, 2075, 6184, 53, 99, 148, 467, 484, 495, 496]
-Item-based CF recommendations: [791, 1116, 1137, 1144, 2566, 2623, 3106, 3899, 3912, 6125]
-User KNN recommendations: [260, 1089, 1278, 912, 1097, 2571, 1220, 1617, 1240, 1208]
-Item KNN recommendations: [750, 921, 1186, 1252, 21, 78, 223, 299, 373, 757]
-Recommendations for user 325 with query 'drama Thriller': [1733, 2075, 180497, 6184, 53, 46723, 99, 148, 143365, 467]
+User-based CF recommendations: [3567, 5244, 7767, 26840, 33138, 78836, 93320, 53, 99, 484]
+Item-based CF recommendations: [106, 129, 685, 885, 1565, 1659, 1696, 1739, 1987, 2075]
+User KNN recommendations: [58559, 48516, 91529, 318, 2329, 7153, 260, 116797, 2028, 2571]
+Item KNN recommendations: [4886, 19, 260, 585, 778, 1287, 1610, 1645, 1732, 2194]
+mf recommendations: [2571, 318, 296, 7153, 58559, 593, 5952, 4993, 356, 47]
+
+Evaluation Metrics:
+precision@5_cf_user: 0.0010
+precision@5_cf_item: 0.0000
+precision@5_knn_user: 0.3051
+precision@5_knn_item: 0.0450
+precision@5_mf: 0.2821
+precision@10_cf_user: 0.0008
+precision@10_cf_item: 0.0002
+precision@10_knn_user: 0.2580
+precision@10_knn_item: 0.0478
+precision@10_mf: 0.2384
+
+building recommendation system with semantic query....
+
+Recommendations for user 435 with query 'drama Thriller': [3567, 5244, 180497, 7767, 26840, 46723, 33138, 78836, 143365, 93320]
+
+--------------------------------------------------------------------------------------
+>> save_model(recommender) function
+saving recommendation system complete!
+
+--------------------------------------------------------------------------------------
+>> usage_saved_model(metadata_path,
+                  path_model: str = 'model/recommender.pkl',
+                  query: str = None,
+                  n_recommendations=10):
+
+Loading saved model....
+
+
+Gernerate recommendations....
+
+Recommendations for user 319
+
+User-based CF recommendations: [633, 3678, 9010, 25906, 77846, 93008, 53, 99, 148, 484]
+Item-based CF recommendations: [298, 876, 1460, 1495, 1574, 1649, 1739, 1826, 2323, 2566]
+User KNN recommendations: [318, 4993, 59315, 260, 7153, 5952, 48516, 33794, 68954, 91529]
+Item KNN recommendations: [34, 260, 339, 344, 377, 608, 1196, 1210, 2028, 2858]
+mf recommendations: [318, 296, 593, 47, 5952, 7153, 260, 50, 527, 589]
+
+Recommendations for user 319 with query 'Comedy':
+['Denise Calls Up (1995)', 'Man with the Golden Arm, The (1955)', 'Tag (2018)', "Love Me If You Dare (Jeux d'enfants) (2003)", 'Mr. Skeffington (1944)', 'Top Five (2014)', '12 Angry Men (1997)', 'Very Potter Sequel, A (2010)', 'Grown Ups (2010)', 'Lamerica (1994)']
