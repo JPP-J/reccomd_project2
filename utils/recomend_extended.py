@@ -4,6 +4,7 @@ from scipy.sparse import csr_matrix
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.neighbors import NearestNeighbors
 from sklearn.model_selection import train_test_split
+from sklearn.decomposition import NMF
 from typing import Tuple, List, Dict, Set
 from multiprocessing import Pool
 from functools import partial
@@ -16,7 +17,7 @@ import tf_keras as keras
 
 
 class RecommenderSystem:
-    def __init__(self, n_neighbors: int = 10):
+    def __init__(self, n_neighbors: int = 10,  n_factors: int = 10):
         """
         Initialize the recommender system with multiple approaches
 
@@ -24,8 +25,11 @@ class RecommenderSystem:
         -----------
         n_neighbors : int
             Number of neighbors for KNN-based approaches
+        n_factors : int
+            Number of latent factors for Matrix Factorization
         """
         self.n_neighbors = n_neighbors
+        self.n_factors = n_factors      # for Integrating Matrix Factorization
         self.user_item_matrix = None
         self.sparse_matrix = None
         self.item_similarity = None
@@ -34,7 +38,12 @@ class RecommenderSystem:
         self.item_knn = None
         self.ratings = None
 
-        # This Part  for Integrate with LLM
+        # Matrix Factorization components
+        self.nmf_model = None
+        self.user_factors = None
+        self.item_factors = None
+
+        # This Part for Integrate with LLM
         self.item_embeddings = None
         self.index = None
         self.item_metadata = None
@@ -70,6 +79,11 @@ class RecommenderSystem:
 
         self.user_knn.fit(self.sparse_matrix)
         self.item_knn.fit(self.sparse_matrix.T)
+
+        # Fit Matrix Factorization model
+        self.nmf_model = NMF(n_components=self.n_factors, init='random', random_state=42)
+        self.user_factors = self.nmf_model.fit_transform(self.user_item_matrix.values)
+        self.item_factors = self.nmf_model.components_
 
         return self
 
@@ -247,11 +261,31 @@ class RecommenderSystem:
 
         return recommendations.nlargest(n_recommendations)
 
-    import os
-    import numpy as np
-    import pandas as pd
-    from multiprocessing import Pool
-    from typing import List, Dict, Set
+    def recommend_by_mf(self, user_id: int, n_recommendations: int = 10) -> pd.Series:
+        """
+        Generate recommendations using Matrix Factorization
+        """
+        if user_id not in self.user_item_matrix.index:
+            raise KeyError(f"User {user_id} not found in the dataset")
+
+        # Get user index
+        user_idx = self.user_item_matrix.index.get_loc(user_id)
+
+        # Predict ratings using user and item factors
+        predicted_ratings = np.dot(self.user_factors[user_idx], self.item_factors)
+
+        # Convert to series
+        recommendations = pd.Series(
+            predicted_ratings,
+            index=self.user_item_matrix.columns
+        )
+
+        # Filter out already rated items
+        user_ratings = self.user_item_matrix.loc[user_id]
+        recommendations[user_ratings > 0] = -1
+
+        return recommendations.nlargest(n_recommendations)
+
 
     def process_user(recommender_instance, user_id: int, test_data: pd.DataFrame, k_values: List[int]) -> Dict:
         """
@@ -304,11 +338,9 @@ class RecommenderSystem:
         return user_precisions
 
     def evaluate(self, test_data: pd.DataFrame, k_values: List[int] = [5, 10]) -> Dict:
-
         """
         Evaluate the recommender system using various metrics
         """
-        # Add more comprehensive error checking
         if test_data.empty:
             raise ValueError("Test data is empty")
 
@@ -322,6 +354,7 @@ class RecommenderSystem:
             precision_cf_item = []
             precision_knn_user = []
             precision_knn_item = []
+            precision_mf = []
 
             for user_id in test_data['user_id'].unique():
                 if user_id in self.user_item_matrix.index:
@@ -335,12 +368,14 @@ class RecommenderSystem:
                             rec_cf_item = set(self.recommend_by_item_cf(user_id, k).index)
                             rec_knn_user = set(self.recommend_by_user_knn(user_id, k).index)
                             rec_knn_item = set(self.recommend_by_item_knn(user_id, k).index)
+                            rec_mf = set(self.recommend_by_mf(user_id, k).index)
 
                             # Calculate precision for each method
-                            precision_cf_user.append(len(rec_cf_user & actual_items) / k)  # Set Intersect
+                            precision_cf_user.append(len(rec_cf_user & actual_items) / k)
                             precision_cf_item.append(len(rec_cf_item & actual_items) / k)
                             precision_knn_user.append(len(rec_knn_user & actual_items) / k)
                             precision_knn_item.append(len(rec_knn_item & actual_items) / k)
+                            precision_mf.append(len(rec_mf & actual_items) / k)
                         except:
                             continue
 
@@ -349,8 +384,10 @@ class RecommenderSystem:
             metrics[f'precision@{k}_cf_item'] = np.mean(precision_cf_item)
             metrics[f'precision@{k}_knn_user'] = np.mean(precision_knn_user)
             metrics[f'precision@{k}_knn_item'] = np.mean(precision_knn_item)
+            metrics[f'precision@{k}_mf'] = np.mean(precision_mf)
 
         return metrics
+
 
     def get_random_user(self):
         user_ids = self.ratings['user_id'].unique()  # Get unique user IDs from ratings data
@@ -449,22 +486,33 @@ def run_recommendation_analysis(ratings_path: str,
     rec_cf_item = recommender.recommend_by_item_cf(random_user, n_recommendations)
     rec_knn_user = recommender.recommend_by_user_knn(random_user, n_recommendations)
     rec_knn_item = recommender.recommend_by_item_knn(random_user, n_recommendations)
+    rec_mf = recommender.recommend_by_mf(random_user, n_recommendations)
 
     print("\nUser-based CF recommendations:", rec_cf_user.index.tolist())
     print("Item-based CF recommendations:", rec_cf_item.index.tolist())
     print("User KNN recommendations:", rec_knn_user.index.tolist())
     print("Item KNN recommendations:", rec_knn_item.index.tolist())
+    print("mf recommendations:", rec_mf.index.tolist())
+
 
     # Evaluate all methods
-    # metrics = recommender.evaluate(test_data, k_values=[5, 10])
-    # print("\nEvaluation Metrics:")
-    # for metric, value in metrics.items():
-    #     print(f"{metric}: {value:.4f}")
-    #
-    # return recommender, metrics
+    metrics = recommender.evaluate(test_data, k_values=[5, 10])
+    print("\nEvaluation Metrics:")
+    for metric, value in metrics.items():
+        print(f"{metric}: {value:.4f}")
+
     return recommender, random_user
 
 # Usage example
 if __name__ == "__main__":
     path = "https://drive.google.com/uc?id=1HDPOyxM6cs1SDx4boqKGrRVQam1VEPfy"
-    run_recommendation_analysis(path)
+    recommender, random_user = run_recommendation_analysis(
+        ratings_path=path,
+        user_col='userId',
+        item_col='movieId',
+        rating_col='rating',
+        frac=0.10,
+        test_size=0.2,
+        n_neighbors=10,
+        n_recommendations=10
+    )
