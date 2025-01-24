@@ -54,7 +54,7 @@ if __name__=='__main__':
 
     recommender = reccomd_sys(path, metadata_path)
 
-    # save_model(recommender)
+    save_model(recommender)
 
 
 
