@@ -48,7 +48,7 @@ class CFModel(nn.Module):
         x = self.dropout(x)             # Dropout after second hidden layer
         x = self.fc3(x)                 # Output layer
 
-        # Constrain predictions to the range [1, 5]
+        # Constrain predictions to the range [1, 5] = [a,b] : scaled_value=original_value×(b−a)+a
         x = torch.sigmoid(x) * 4 + 1  # Scale sigmoid output to [1, 5]
         return x
 
@@ -151,8 +151,8 @@ def CF_model_trian(path, frac=0.025, epoch=10, batch_size=16, embedding_dim=64):
 
                 outputs = model(batch_user_ids, batch_item_ids)
                 loss = criterion(outputs.squeeze(), batch_ratings)
-                val_loss += loss.item()
 
+                val_loss += loss.item()
                 preds = outputs.squeeze().round()
                 correct_val += (preds == batch_ratings).sum().item()
                 total_val += batch_ratings.size(0)

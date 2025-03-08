@@ -372,7 +372,7 @@ class RecommenderSystem:
         self.item_embeddings = model.encode(descriptions)
 
         # Build FAISS index for semantic filtering
-        self.index = faiss.IndexFlatL2(self.item_embeddings.shape[1])
+        self.index = faiss.IndexFlatL2(self.item_embeddings.shape[1])   #  L2 distance (Euclidean distance) 
         self.index.add(self.item_embeddings)
 
         # Store the item metadata for future reference

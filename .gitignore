@@ -4,9 +4,9 @@
 .venv/
 
 # Ignore large files such as model weights or datasets
-*.h5
+#*.h5
 *.csv
-*.keras
+#*.keras
 .idea/
 config/
 test/
