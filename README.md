@@ -1,4 +1,7 @@
 # Recommendation System Project No.2
+![Last Commit](https://img.shields.io/github/last-commit/JPP-J/reccomd_project2?style=flat-square)
+![Jupyter Notebook](https://img.shields.io/badge/jupyter%20notebook-97.6%25-blue?style=flat-square)
+![Languages](https://img.shields.io/github/languages/count/JPP-J/reccomd_project2?style=flat-square)
 
 This repo is home to the code that accompanies Jidapa's *Recommendation System Project No.2* , which provides; 
 - example python code for Recommendation System on [Movie items rating dataset](https://drive.google.com/drive/folders/1cM305e_wLGqGuKnQE2tg0bti8LqekquW?usp=sharing) with:
